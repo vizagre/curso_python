@@ -1,0 +1,32 @@
+# Ambiente virtual
+.venv/
+venv/
+env/
+ENV/
+
+# Bytecode Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Distribuição / empacotamento
+dist/
+build/
+*.egg-info/
+*.egg
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy
+.mypy_cache/
+
+# IDEs
+.vscode/
+.idea/
+
+# Variáveis de ambiente
+.env
