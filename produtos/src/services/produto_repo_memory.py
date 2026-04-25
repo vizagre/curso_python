@@ -1,10 +1,13 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
 from typing import List, Dict, Optional
 from datetime import datetime
 
-from src.models.produto import Produto
-from src.services.produto_repo_base import ProdutoRepositoryBase
+try:
+    from src.models.produto import Produto
+    from src.services.produto_repo_base import ProdutoRepositoryBase
+except ModuleNotFoundError:
+    from models.produto import Produto
+    from services.produto_repo_base import ProdutoRepositoryBase
 
 class ProdutoRepositoryMemory(ProdutoRepositoryBase):
     """ Implementação da interface de repositório de produtos usando memória. """
@@ -26,7 +29,7 @@ class ProdutoRepositoryMemory(ProdutoRepositoryBase):
         return None
     
     def criar(self, nome: str, preco: float, sku: str, data_criacao: datetime, ativo: bool) -> Produto:
-        produto = Produto(id=self._proximo_id, nome=nome, preco=preco, sku=sku, data_criacao=data_criacao, ativo=ativo)
+        produto = Produto(id_=self._proximo_id, nome=nome, preco=preco, sku=sku, data_criacao=data_criacao, ativo=ativo)
         self._produtos[self._proximo_id] = produto
         self._proximo_id += 1
         return produto

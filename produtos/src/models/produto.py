@@ -1,7 +1,7 @@
 from __future__ import annotations
 from datetime import datetime
 
-class Produto():
+class Produto:
     """
         Classe que representa um produto.
         Atributos:
@@ -17,13 +17,15 @@ class Produto():
     """
 
     def __init__(self, id_: int, nome: str, sku: str, preco: float, data_criacao: datetime = None, ativo: bool = True) -> None:
-        self._id :int = id_
-        self.nome :str = nome
-        self.sku :str = sku
-        self._preco :float  = 0.00
+        self._id: int = id_
+        self.nome: str = nome
+        self._sku: str = ""
+        self.sku = sku
+        self._preco: float = 0.00
         self.preco = preco
-        self.data_criacao :datetime = data_criacao if data_criacao else datetime.now()
-        self.ativo :bool = ativo
+        self._data_criacao: datetime = datetime.now()
+        self.data_criacao = data_criacao if data_criacao else datetime.now()
+        self.ativo: bool = ativo
 
 
     def __str__(self) -> str:
@@ -46,9 +48,17 @@ class Produto():
     def data_criacao(self) -> datetime:
         return self._data_criacao   
 
-    @property
-    def sku(self) -> str:
-        return self._sku
+    @sku.setter
+    def sku(self, valor: str) -> None:
+        if not valor or not valor.strip():
+            raise ValueError("O SKU não pode ser vazio.")
+        self._sku = valor.strip()
+
+    @data_criacao.setter
+    def data_criacao(self, valor: datetime) -> None:
+        if not isinstance(valor, datetime):
+            raise ValueError("A data de criação deve ser um objeto datetime.")
+        self._data_criacao = valor
 
     @preco.setter
     def preco(self, valor: float) -> None:
