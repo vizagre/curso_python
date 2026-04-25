@@ -1,4 +1,5 @@
 from __future__ import annotations
+import datetime
 from typing import Optional
 from pydantic import BaseModel, Field   
 
@@ -10,7 +11,12 @@ class ProdutoBase(BaseModel):
     preco: float = Field(..., gt=0, 
                          description="O preço deve ser maior que zero.")
     
+    sku: str = Field(..., min_length=3, max_length=50,
+                     description="O SKU deve ter entre 3 e 50 caracteres.") 
+
     ativo: bool = True
+
+    data_criacao: datetime.datetime = Field(default_factory=datetime.datetime.now)
 
 
 class ProdutoCreate(ProdutoBase):
@@ -27,6 +33,11 @@ class ProdutoUpdate(BaseModel):
                                   description="O preço deve ser maior que zero.")
     
     ativo: Optional[bool] = None
+
+    sku: Optional[str] = Field(None, min_length=3, max_length=50,
+                             description="O SKU deve ter entre 3 e 50 caracteres.") 
+    
+    data_criacao: Optional[datetime.datetime] = None
 
 
 class ProdutoRead(ProdutoBase):

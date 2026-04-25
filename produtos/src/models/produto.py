@@ -1,4 +1,5 @@
 from __future__ import annotations
+from datetime import datetime
 
 class Produto():
     """
@@ -11,29 +12,43 @@ class Produto():
             nome (str): O nome do produto.
             preco (float): O preço do produto.
                 _preco -> atributo privado
+            data_criacao (datetime): A data e hora em que o produto foi criado.
             ativo (bool): Indica se o produto está ativo ou não.
     """
 
-    def __init__(self, id_: int, nome: str, preco: float, ativo: bool = True) -> None:
+    def __init__(self, id_: int, nome: str, sku: str, preco: float, data_criacao: datetime = None, ativo: bool = True) -> None:
         self._id :int = id_
         self.nome :str = nome
+        self.sku :str = sku
         self._preco :float  = 0.00
         self.preco = preco
+        self.data_criacao :datetime = data_criacao if data_criacao else datetime.now()
         self.ativo :bool = ativo
 
 
     def __str__(self) -> str:
-        return f"Produto(id={self._id}, nome='{self.nome}', preco={self._preco}, ativo={self.ativo})" 
+        return f"Produto(id={self._id}, nome='{self.nome}', sku='{self._sku}', preco={self._preco}, data_criacao={self.data_criacao}, ativo={self.ativo})" 
 
 
     @property
     def id(self) -> int:   
         return self._id
 
+    @property
+    def sku(self) -> str:
+        return self._sku
 
     @property
     def preco(self) -> float:
         return self._preco
+
+    @property
+    def data_criacao(self) -> datetime:
+        return self._data_criacao   
+
+    @property
+    def sku(self) -> str:
+        return self._sku
 
     @preco.setter
     def preco(self, valor: float) -> None:

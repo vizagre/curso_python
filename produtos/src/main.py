@@ -30,6 +30,15 @@ def obter_produto(produto_id: int):
     return ProdutoRead(id=produto.id, nome=produto.nome, preco=produto.preco, ativo=produto.ativo)
 
 
+@app.get("/produtos/sku/{produto_sku}", response_model=ProdutoRead, tags=["produtos"])
+def obter_produto_por_sku(produto_sku: str):
+    produto = produto_service.obter_produto_por_sku(produto_sku)
+
+    if not produto:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
+    return ProdutoRead(id=produto.id, nome=produto.nome, preco=produto.preco, ativo=produto.ativo)
+
+
 @app.get("/produtos", response_model=List[ProdutoRead], tags=["produtos"])
 def listar_produtos():
     produtos = produto_service.listar_produto()
@@ -38,6 +47,6 @@ def listar_produtos():
 
 @app.post("/produtos", response_model=ProdutoRead, status_code=status.HTTP_201_CREATED, tags=["produtos"])
 def criar_produto(produto: ProdutoCreate):
-    novo_produto = produto_service.criar_produto(produto)
+    novo_produto = produto_service.criar_produto(produto.nome, produto.preco, produto.sku, produto.data_criacao, produto.ativo)
     return ProdutoRead(id=novo_produto.id, nome=novo_produto.nome, preco=novo_produto.preco, ativo=novo_produto.ativo)
 
