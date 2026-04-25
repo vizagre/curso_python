@@ -30,3 +30,6 @@ htmlcov/
 
 # Variáveis de ambiente
 .env
+
+#local database
+data/*.db

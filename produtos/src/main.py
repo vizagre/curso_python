@@ -1,16 +1,22 @@
 from __future__ import annotations  
 from typing import List
-from fastapi import FastAPI, HTTPException, status
+
+from fastapi import FastAPI, HTTPException, status, Depends
+from sqlalchemy.orm import Session
 
 try:
     from src.models.produto_schemas import ProdutoCreate, ProdutoRead, ProdutoUpdate
-    from src.services.produto_repo_memory import ProdutoRepositoryMemory
+    #from src.services.produto_repo_memory import ProdutoRepositoryMemory
+    from src.services.produto_repo_sqlalchemy import ProdutoRepositorySQLAlchemy
     from src.services.produto_service import ProdutoService
+    from src.utils.database import get_db, criar_tabelas
 except ModuleNotFoundError:
     # Suporta execução direta: `python src/main.py`.
     from models.produto_schemas import ProdutoCreate, ProdutoRead, ProdutoUpdate
-    from services.produto_repo_memory import ProdutoRepositoryMemory
+    #from services.produto_repo_memory import ProdutoRepositoryMemory
+    from services.produto_repo_sqlalchemy import ProdutoRepositorySQLAlchemy
     from services.produto_service import ProdutoService
+    from utils.database import get_db, criar_tabelas
 
 
 app = FastAPI(
@@ -19,17 +25,22 @@ app = FastAPI(
     version="1.0.0"
 )
 
-repo = ProdutoRepositoryMemory()
-produto_service = ProdutoService(repo)
+#repo = ProdutoRepositoryMemory()
+#produto_service = ProdutoService(repo)
+
+criar_tabelas()
+
 
 # Rota de healthcheck
 @app.get("/", tags=["healthcheck"])
 def read_root():
-    return {"message": "API de Produtos está funcionando!"}
+    return {"message": "API de Produtos está funcionando. Acesse /docs para ver a documentação swagger."}
 
 # Pesquisar produto por ID
 @app.get("/produtos/{produto_id}", response_model=ProdutoRead, status_code=status.HTTP_200_OK, tags=["produtos"])
-def obter_produto(produto_id: int):
+def obter_produto(produto_id: int, db: Session = Depends(get_db)):
+    repo = ProdutoRepositorySQLAlchemy(db)
+    produto_service = ProdutoService(repo=repo)
     produto = produto_service.obter_produto(produto_id)
 
     if not produto:
@@ -38,7 +49,11 @@ def obter_produto(produto_id: int):
 
 # Pesquisar produto por SKU
 @app.get("/produtos/sku/{produto_sku}", response_model=ProdutoRead, status_code=status.HTTP_200_OK, tags=["produtos"])
-def obter_produto_por_sku(produto_sku: str):
+def obter_produto_por_sku(produto_sku: str, db: Session = Depends(get_db)):
+
+    repo = ProdutoRepositorySQLAlchemy(db)
+    produto_service = ProdutoService(repo=repo)
+
     produto = produto_service.obter_produto_por_sku(produto_sku)
 
     if not produto:
@@ -47,7 +62,11 @@ def obter_produto_por_sku(produto_sku: str):
 
 # Listar todos os produtos
 @app.get("/produtos", response_model=List[ProdutoRead], status_code=status.HTTP_200_OK, tags=["produtos"])
-def listar_produtos():
+def listar_produtos(db: Session = Depends(get_db)):
+
+    repo = ProdutoRepositorySQLAlchemy(db)
+    produto_service = ProdutoService(repo=repo)
+    
     produtos = produto_service.listar_produto()
 
     if not produtos:
@@ -56,13 +75,21 @@ def listar_produtos():
 
 # Criar um novo produto
 @app.post("/produtos", status_code=status.HTTP_201_CREATED, tags=["produtos"])
-def criar_produto(produto: ProdutoCreate):
+def criar_produto(produto: ProdutoCreate, db: Session = Depends(get_db)):
+    
+    repo = ProdutoRepositorySQLAlchemy(db)
+    produto_service = ProdutoService(repo=repo)
+    
     novo_produto = produto_service.criar_produto(produto.nome, produto.preco, produto.sku, produto.data_criacao, produto.ativo)
     return ProdutoRead(id=novo_produto.id, nome=novo_produto.nome, sku=novo_produto.sku, data_criacao=novo_produto.data_criacao, preco=novo_produto.preco, ativo=novo_produto.ativo)
 
 # Atualizar um produto existente
 @app.put("/produtos/{produto_id}", response_model=ProdutoRead, status_code=status.HTTP_200_OK, tags=["produtos"])
-def atualizar_produto(produto_id: int, produto: ProdutoUpdate):
+def atualizar_produto(produto_id: int, produto: ProdutoUpdate, db: Session = Depends(get_db)):
+    
+    repo = ProdutoRepositorySQLAlchemy(db)
+    produto_service = ProdutoService(repo=repo)
+    
     produto_existente = produto_service.obter_produto(produto_id)
 
     if not produto_existente:
@@ -86,7 +113,11 @@ def atualizar_produto(produto_id: int, produto: ProdutoUpdate):
 
 # Remover um produto
 @app.delete("/produtos/{produto_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["produtos"])
-def remover_produto(produto_id: int):
+def remover_produto(produto_id: int, db: Session = Depends(get_db)):
+    
+    repo = ProdutoRepositorySQLAlchemy(db)
+    produto_service = ProdutoService(repo=repo)
+    
     produto_existente = produto_service.obter_produto(produto_id)
 
     if not produto_existente:
@@ -96,4 +127,4 @@ def remover_produto(produto_id: int):
 
     if not sucesso:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erro ao remover o produto")      
-    
+    return {"detail": "Produto removido com sucesso"}
